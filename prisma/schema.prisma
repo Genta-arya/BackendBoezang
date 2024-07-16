@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  name        String
+  category    String
+  description String     @db.Text
+  price       Int
+  image       String? // Menyimpan URL gambar atau path ke gambar
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  capacities  Capacity[] // Relationship to Capacity model
+  colors      Color[] // Relationship to Color model
+}
+
+model Capacity {
+  id        String  @id @default(cuid())
+  value     String
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Color {
+  id        String  @id @default(cuid())
+  value     String
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
