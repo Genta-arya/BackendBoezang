@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import path from "path";
 import ProductsRouters from "./Routes/Products/ProductsRoute.js";
+import PromosRouters from "./Routes/Promos/PromosRoute.js";
 
 const app = express();
 const port = 5001;
@@ -43,6 +44,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/product", ProductsRouters);
+app.use("/api/v1/promo", PromosRouters);
 
 httpServer.listen(port, () => {
   console.log("Server running on port " + port);

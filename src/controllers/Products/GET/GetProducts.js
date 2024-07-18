@@ -21,6 +21,7 @@ export const GetTypeProduct = async (req, res) => {
         include: {
           capacities: true, // Include related capacities
           colors: true, // Include related colors
+          promos: true, // Include related promos
         },
       });
 
@@ -37,6 +38,7 @@ export const GetTypeProduct = async (req, res) => {
         include: {
           capacities: true, // Include related capacities
           colors: true, // Include related colors
+          promos: true, // Include related promos
         },
       });
 
