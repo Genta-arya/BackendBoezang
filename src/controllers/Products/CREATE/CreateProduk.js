@@ -14,7 +14,7 @@ export const CreateProduk = async (req, res) => {
       const localImagePath = path.join("Images", imageFileName);
       const imageBaseUrl = process.env.IMAGE_BASE_URL;
       if (process.env.NODE_ENV === "production") {
-        imagePath = `${imageBaseUrl}${localImagePath}`;
+        imagePath = `${imageBaseUrl}/${localImagePath}`;
       } else {
         imagePath = `${imageBaseUrl}:${port}/${localImagePath}`;
       }
