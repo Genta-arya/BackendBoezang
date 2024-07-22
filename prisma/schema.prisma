@@ -7,25 +7,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Auth {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  token     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Product {
-  id          String     @id @default(cuid())
-  name        String
-  category    String
-  description String     @db.Text
-  price       Int
-  image       String? // Menyimpan URL gambar atau path ke gambar
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  capacities  Capacity[] // Relationship to Capacity model
-  colors      Color[]
-  promos      Promo[]    @relation(name: "ProductToPromo")
+  id             String          @id @default(cuid())
+  name           String
+  category       String
+  description    String          @db.Text
+  price          Int
+  image          String? // Menyimpan URL gambar atau path ke gambar
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  capacities     Capacity[] // Relationship to Capacity model
+  colors         Color[]
+  promos         Promo[]         @relation(name: "ProductToPromo")
+  capacityPrices CapacityPrice[] // New relationship
 }
 
 model Capacity {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   value     String
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  prices    CapacityPrice[] // New relationship
 }
 
 model Color {
@@ -35,12 +46,78 @@ model Color {
   product   Product @relation(fields: [productId], references: [id])
 }
 
+model CapacityPrice {
+  id         String   @id @default(cuid())
+  capacityId String
+  productId  String
+  price      Int
+  capacity   Capacity @relation(fields: [capacityId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
 model Promo {
-  id          String     @id @default(cuid())
-  discount    Float
-  products    Product[]  @relation(name: "ProductToPromo")
-  expired     Boolean    @default(false) 
-  expiresAt   DateTime   
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id        String    @id @default(cuid())
+  discount  Float
+  products  Product[] @relation(name: "ProductToPromo")
+  expired   Boolean   @default(false)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Quotest {
+  id        String   @id @default(cuid())
+  content   String   @db.VarChar(255)
+  author    String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Artikel {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  thumbnail String
+  title     String
+  author    String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Produk {
+  id          String    @id @default(cuid())
+  name        String
+  category    String
+  spesifikasi String    @db.Text
+  status      Boolean   @default(true)
+  deskripsi   String    @db.Text
+  imageUrl    String
+  variants    Variant[]
+}
+
+model Variant {
+  id            String  @id @default(cuid())
+  externalId    String  @unique // ID yang tidak berganti
+  name          String
+  kapasitas     Int
+  price         Int
+  product       Produk  @relation(fields: [productId], references: [id])
+  productId     String
+  colorVariants Warna[]
+}
+
+model PromoVariant {
+  id         String   @id @default(cuid())
+  variantId  String   @unique // variantId masih diperlukan tetapi tanpa relasi
+  discount   Int
+  status     Boolean
+  expiryDate DateTime
+}
+
+model Warna {
+  id        String  @id @default(cuid())
+  value     String
+  variant   Variant @relation(fields: [variantId], references: [id])
+  variantId String
 }
