@@ -12,11 +12,16 @@ export const CreateProduk = async (req, res) => {
     if (req.file) {
       const imageFileName = path.basename(req.file.path);
       const localImagePath = path.join("Images", imageFileName);
-      imagePath = `http://localhost:${port}/${localImagePath}`;
+      const imageBaseUrl = process.env.IMAGE_BASE_URL;
+      if (process.env.NODE_ENV === "production") {
+        imagePath = `${imageBaseUrl}${localImagePath}`;
+      } else {
+        imagePath = `${imageBaseUrl}:${port}/${localImagePath}`;
+      }
     }
 
     // Get data from request body
-    const { name, category, variants , desc , spesifikasi } = req.body;
+    const { name, category, variants, desc, spesifikasi } = req.body;
 
     // Parse the variants JSON string
     let parsedVariants;
@@ -48,8 +53,8 @@ export const CreateProduk = async (req, res) => {
       data: {
         name,
         category,
-        spesifikasi : spesifikasi,
-        deskripsi : desc,
+        spesifikasi: spesifikasi,
+        deskripsi: desc,
         imageUrl: imagePath, // Use full image URL
         variants: {
           create: parsedVariants.map((variant) => ({
