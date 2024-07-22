@@ -19,12 +19,8 @@ export const EditProduks = async (req, res) => {
       const imageFileName = path.basename(req.file.path);
       const localImagePath = path.join("Images", imageFileName);
       const imageBaseUrl = process.env.IMAGE_BASE_URL;
-      if (process.env.NODE_ENV === "production") {
-        imagePath = `${imageBaseUrl}/${localImagePath}`;
-      } else {
-        imagePath = `${imageBaseUrl}:${port}/${localImagePath}`;
-      }
-      
+
+      imagePath = `${imageBaseUrl}/${localImagePath}`;
     }
 
     // Parse the variants JSON string
@@ -80,24 +76,14 @@ export const EditProduks = async (req, res) => {
         message: "Product not found",
       });
     }
+
     if (req.file && existingProduct.imageUrl) {
       // Delete old image
-      let oldImagePath;
-      
-      if (process.env.NODE_ENV === "dev") {
-        oldImagePath = existingProduct.imageUrl.split(`http://localhost:${5001}/`)[1];
-        if (oldImagePath && fs.existsSync(path.join(__dirname, oldImagePath))) {
-          fs.unlinkSync(path.join(__dirname, oldImagePath));
-        }
-      } else {
-       
-        oldImagePath = existingProduct.imageUrl.split(process.env.IMAGE_BASE_URL)[1];
-        if (oldImagePath) {
-        
-          if (fs.existsSync(path.join(__dirname, oldImagePath))) {
-            fs.unlinkSync(path.join(__dirname, oldImagePath));
-          }
-        }
+      const oldImagePath = existingProduct.imageUrl.split(
+        `${process.env.IMAGE_BASE_URL}/`
+      )[1];
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
       }
     }
 

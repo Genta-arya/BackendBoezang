@@ -56,7 +56,7 @@ export const EditArtikel = async (req, res) => {
       // Tentukan path gambar lokal dan URL lengkap
       const localImagePath = path.join("Images", imageFileName);
       const imageBaseUrl = process.env.IMAGE_BASE_URL;
-      imagePath = `${imageBaseUrl}${localImagePath}`;
+      imagePath = `${imageBaseUrl}/${localImagePath}`;
     }
 
     const dataToUpdate = {

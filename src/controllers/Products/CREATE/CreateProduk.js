@@ -13,11 +13,8 @@ export const CreateProduk = async (req, res) => {
       const imageFileName = path.basename(req.file.path);
       const localImagePath = path.join("Images", imageFileName);
       const imageBaseUrl = process.env.IMAGE_BASE_URL;
-      if (process.env.NODE_ENV === "production") {
-        imagePath = `${imageBaseUrl}/${localImagePath}`;
-      } else {
-        imagePath = `${imageBaseUrl}:${port}/${localImagePath}`;
-      }
+
+      imagePath = `${imageBaseUrl}/${localImagePath}`;
     }
 
     // Get data from request body
