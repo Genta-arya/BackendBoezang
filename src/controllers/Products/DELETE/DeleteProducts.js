@@ -5,6 +5,7 @@ import path from "path";
 export const DeleteProducts = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id);
 
     // Fetch the product to get the image URL and variants
     const product = await prisma.produk.findUnique({
@@ -24,12 +25,24 @@ export const DeleteProducts = async (req, res) => {
 
     // Delete associated images
     if (product.imageUrl) {
-      const oldImagePath = product.imageUrl.split(
-        process.env.IMAGE_BASE_URL
-      )[1];
+      const oldImagePath = product.imageUrl.split(process.env.IMAGE_BASE_URL)[1];
       if (oldImagePath && fs.existsSync(path.join("Images", oldImagePath))) {
         fs.unlinkSync(path.join("Images", oldImagePath));
       }
+    }
+
+    // Delete color variants and variants
+    for (const variant of product.variants) {
+      await prisma.warna.deleteMany({
+        where: {
+          variantId: variant.id,
+        },
+      });
+      await prisma.variant.delete({
+        where: {
+          id: variant.id,
+        },
+      });
     }
 
     // Delete product
@@ -39,9 +52,7 @@ export const DeleteProducts = async (req, res) => {
       },
     });
 
-    res
-      .status(200)
-      .json({ message: "Product and associated data deleted successfully" });
+    res.status(200).json({ message: "Product and associated data deleted successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
