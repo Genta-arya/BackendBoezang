@@ -16,54 +16,7 @@ model Auth {
   updatedAt DateTime @updatedAt
 }
 
-model Product {
-  id             String          @id @default(cuid())
-  name           String
-  category       String
-  description    String          @db.Text
-  price          Int
-  image          String? // Menyimpan URL gambar atau path ke gambar
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  capacities     Capacity[] // Relationship to Capacity model
-  colors         Color[]
-  promos         Promo[]         @relation(name: "ProductToPromo")
-  capacityPrices CapacityPrice[] // New relationship
-}
 
-model Capacity {
-  id        String          @id @default(cuid())
-  value     String
-  productId String
-  product   Product         @relation(fields: [productId], references: [id])
-  prices    CapacityPrice[] // New relationship
-}
-
-model Color {
-  id        String  @id @default(cuid())
-  value     String
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model CapacityPrice {
-  id         String   @id @default(cuid())
-  capacityId String
-  productId  String
-  price      Int
-  capacity   Capacity @relation(fields: [capacityId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
-}
-
-model Promo {
-  id        String    @id @default(cuid())
-  discount  Float
-  products  Product[] @relation(name: "ProductToPromo")
-  expired   Boolean   @default(false)
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
 
 model Quotest {
   id        String   @id @default(cuid())
