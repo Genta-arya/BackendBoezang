@@ -12,6 +12,7 @@ import QuotesRouters from "./Routes/Quotest/QuotesRoute.js";
 import ArtikelRouters from "./Routes/Artikel/ArtikelRoute.js";
 import SearchRouters from "./Routes/Search/SearchRoute.js";
 import BrowsurRouters from "./Routes/Browsur/BrowsurRoute.js";
+import EmailRouters from "./Routes/EmailSending/EmailRoute.js";
 const app = express();
 const port = 5001;
 const httpServer = createServer(app);
@@ -55,7 +56,7 @@ app.use("/api/v1/quotest", QuotesRouters);
 app.use("/api/v1/artikel", ArtikelRouters);	
 app.use("/api/v1/search", SearchRouters);	
 app.use("/api/v1/popup", BrowsurRouters);	
-
+app.use("/api/v1/email", EmailRouters);	
 httpServer.listen(port, () => {
   console.log("Server running on port " + port);
 });

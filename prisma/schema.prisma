@@ -8,12 +8,26 @@ datasource db {
 }
 
 model Auth {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  token     String?
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  token    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  otps Otp[] @relation("UserOtps")
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  code      String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  authId Int
+  auth   Auth @relation("UserOtps", fields: [authId], references: [id])
 }
 
 model Quotest {
