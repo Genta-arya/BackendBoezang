@@ -78,9 +78,7 @@ export const getBrowsur = async (req, res) => {
         images: true,
       },
     });
-    if (!browsur) {
-      return res.status(404).json({ message: "Browsur not found." });
-    }
+   
     res.status(200).json({ data: browsur, message: "Success" });
   } catch (error) {
     console.log(error);
