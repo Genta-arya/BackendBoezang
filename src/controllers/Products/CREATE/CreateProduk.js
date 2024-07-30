@@ -46,8 +46,12 @@ export const CreateProduk = async (req, res) => {
     }
 
     // Create product
+    const formattedDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+    const customId = `${name.toLowerCase().replace(/\s+/g, '-')}-${formattedDate}`; // Format ID
+
     const newProduct = await prisma.produk.create({
       data: {
+        id: customId,
         name,
         category,
         spesifikasi: spesifikasi,
@@ -60,7 +64,7 @@ export const CreateProduk = async (req, res) => {
             kapasitas:
               category.toLowerCase() === "iphone"
                 ? parseInt(variant.kapasitas, 10)
-                : 0, // Set kapasitas only for iPhone
+                : 0, 
             price:
               category.toLowerCase() === "iphone"
                 ? parseInt(variant.price, 10)
