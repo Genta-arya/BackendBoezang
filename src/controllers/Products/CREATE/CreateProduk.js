@@ -46,8 +46,9 @@ export const CreateProduk = async (req, res) => {
     }
 
     // Create product
-    const formattedDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-    const customId = `${name.toLowerCase().replace(/\s+/g, '-')}-${formattedDate}`; // Format ID
+    const randomId = uuidv4();
+    const formattedDate = new Date().toISOString().split('T')[0]; 
+    const customId = `${name.toLowerCase().replace(/\s+/g, '-')}-${formattedDate} - ${randomId}`; 
 
     const newProduct = await prisma.produk.create({
       data: {
