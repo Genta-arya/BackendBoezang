@@ -11,6 +11,8 @@ export const EditProduks = async (req, res) => {
   const { name, category, variants, desc, status, externalIds, spesifikasi } =
     req.body;
 
+    console.log(variants)
+
   console.log("data externalId", externalIds);
 
   try {
@@ -110,7 +112,7 @@ export const EditProduks = async (req, res) => {
       });
 
       // Create new variants and map old to new IDs
-      const newVariants = await Promise.all(
+      await Promise.all(
         parsedVariants.map(async (variant, index) => {
           // Generate a new UUID for new variants if not provided
           const externalId = externalIdsArray[index] || uuidv4();
@@ -122,6 +124,7 @@ export const EditProduks = async (req, res) => {
             data: {
               externalId, // Save the external ID
               name: "produk",
+              quality: variant.quality,
               kapasitas:
                 category.toLowerCase() === "iphone"
                   ? parseInt(variant.kapasitas, 10)

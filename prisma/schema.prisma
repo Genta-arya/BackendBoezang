@@ -72,6 +72,7 @@ model Variant {
   name          String
   kapasitas     Int
   price         Int
+  quality       Boolean @default(true)
   product       Produk  @relation(fields: [productId], references: [id])
   productId     String
   colorVariants Warna[]

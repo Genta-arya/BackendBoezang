@@ -62,6 +62,7 @@ export const CreateProduk = async (req, res) => {
           create: parsedVariants.map((variant) => ({
             name: "produk",
             externalId: uuidv4(),
+            quality: variant.quality,
             kapasitas:
               category.toLowerCase() === "iphone"
                 ? parseInt(variant.kapasitas, 10)
