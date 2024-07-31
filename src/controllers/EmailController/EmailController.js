@@ -16,7 +16,7 @@ export const sendEmail = async (req, res) => {
     tls: {
       rejectUnauthorized: false,
     },
-    debug: true, // Useful for debugging, can be set to false in production
+    debug: true,
   });
 
   const mailOptions = {
