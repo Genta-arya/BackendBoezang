@@ -50,9 +50,9 @@ export const CreateOtp = async (req, res) => {
         user: process.env.EMAIL_SMTP,
         pass: process.env.EMAIL_PASSWORD,
       },
-      secure: false,
+      secure: true,
       tls: {
-        rejectUnauthorized: false,
+        rejectUnauthorized: true,
       },
       debug: true,
     });
