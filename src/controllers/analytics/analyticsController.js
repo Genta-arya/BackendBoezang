@@ -11,7 +11,7 @@ export const initializeSocket = (io) => {
       try {
         // Mengatur waktu ke waktu Indonesia (WIB)
         const visitTime = new Date();
-        visitTime.setHours(visitTime.getHours() + 0);
+        visitTime.setHours(visitTime.getHours() + 7);
 
         // Membuat entri baru untuk setiap kunjungan
         await prisma.analytic.create({
