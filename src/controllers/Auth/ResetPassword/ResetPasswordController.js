@@ -44,17 +44,17 @@ export const CreateOtp = async (req, res) => {
     });
 
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
+      host: "103.76.129.70",
       port: 587,
       auth: {
         user: process.env.EMAIL_SMTP,
         pass: process.env.EMAIL_PASSWORD,
       },
-      secure: false,
+
       tls: {
         rejectUnauthorized: false,
       },
-      debug: true,
+ 
     });
 
     // Persiapkan opsi email
