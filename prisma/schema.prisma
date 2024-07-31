@@ -106,3 +106,12 @@ model Warna {
   variant   Variant @relation(fields: [variantId], references: [id])
   variantId String
 }
+
+
+model Analytic {
+  id        Int      @id @default(autoincrement())
+  ip        String
+  page      String
+  device    Json
+  visitTime DateTime @default(now())
+}

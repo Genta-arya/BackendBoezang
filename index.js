@@ -8,14 +8,27 @@ import ProductsRouters from "./Routes/Products/ProductsRoute.js";
 import PromosRouters from "./Routes/Promos/PromosRoute.js";
 import AuthRouters from "./Routes/Auth/AuthRoute.js";
 import QuotesRouters from "./Routes/Quotest/QuotesRoute.js";
-
+import { Server } from "socket.io";
 import ArtikelRouters from "./Routes/Artikel/ArtikelRoute.js";
 import SearchRouters from "./Routes/Search/SearchRoute.js";
 import BrowsurRouters from "./Routes/Browsur/BrowsurRoute.js";
 import EmailRouters from "./Routes/EmailSending/EmailRoute.js";
+import Analyticsrouter from "./Routes/Analytics/AnalyticsRoute.js";
+
+import {  initializeSocket } from "./src/controllers/analytics/analyticsController.js";
 const app = express();
 const port = 5001;
 const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*", // Your frontend URL
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+initializeSocket(io);
+app.set("io", io);
 
 app.use(express.json());
 
@@ -49,14 +62,15 @@ app.get("/", (req, res) => {
   res.send("API BOEZANG APPLE");
 });
 
+app.use("/api/v1/analytics", Analyticsrouter);
 app.use("/api/v1/user", AuthRouters);
 app.use("/api/v1/product", ProductsRouters);
 app.use("/api/v1/promo", PromosRouters);
 app.use("/api/v1/quotest", QuotesRouters);
-app.use("/api/v1/artikel", ArtikelRouters);	
-app.use("/api/v1/search", SearchRouters);	
-app.use("/api/v1/popup", BrowsurRouters);	
-app.use("/api/v1/email", EmailRouters);	
+app.use("/api/v1/artikel", ArtikelRouters);
+app.use("/api/v1/search", SearchRouters);
+app.use("/api/v1/popup", BrowsurRouters);
+app.use("/api/v1/email", EmailRouters);
 httpServer.listen(port, () => {
   console.log("Server running on port " + port);
 });
