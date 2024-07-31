@@ -44,7 +44,7 @@ export const CreateOtp = async (req, res) => {
     });
 
     const transporter = nodemailer.createTransport({
-      host: "127.0.0.1",
+      host: process.env.EMAIL_HOST,
       port: 587,
       auth: {
         user: process.env.EMAIL_SMTP,
