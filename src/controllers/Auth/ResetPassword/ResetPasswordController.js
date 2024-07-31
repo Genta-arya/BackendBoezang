@@ -44,11 +44,11 @@ export const CreateOtp = async (req, res) => {
     });
 
     const transporter = nodemailer.createTransport({
-      host: "103.76.129.70",
+      host: "smtp-relay.brevo.com",
       port: 587,
       auth: {
-        user: process.env.EMAIL_SMTP,
-        pass: process.env.EMAIL_PASSWORD,
+        user: "79a128001@smtp-brevo.com",
+        pass: "YLnASjyaHk8vWUfb",
       },
 
       tls: {
