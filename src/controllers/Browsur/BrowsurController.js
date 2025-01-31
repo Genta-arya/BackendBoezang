@@ -1,12 +1,15 @@
 import prisma from "../../config/Prisma.js";
 import fs from "fs";
 import path from "path";
-
 export const addBrowsur = async (req, res) => {
   try {
-    const { title, status } = req.body;
-    const files = req.files;
-    const imageBaseUrl = process.env.IMAGE_BASE_URL;
+    const { title, status, img_url } = req.body;
+
+    if (!title || status === undefined) {
+      return res
+        .status(400)
+        .json({ message: "Title and status are required." });
+    }
 
     // Check for existing active browsurs
     if (status === "true") {
@@ -31,15 +34,12 @@ export const addBrowsur = async (req, res) => {
       },
     });
 
-    if (files && files.length > 0) {
-      const imagePromises = files.map((file) => {
-        const imageFileName = path.basename(file.path);
-        const localImagePath = path.join("Images", imageFileName);
-        const imagePath = `${imageBaseUrl}/${localImagePath}`;
-
+    // Mengecek apakah img_url ada, dan jika ada mengekstrak file_url
+    if (img_url && img_url.files && img_url.files.length > 0) {
+      const imagePromises = img_url.files.map((file) => {
         return prisma.imageBrowsur.create({
           data: {
-            url: imagePath,
+            url: file.file_url, // Ambil URL dari file_url
             browsurId: newBrowsur.id,
           },
         });
@@ -54,18 +54,6 @@ export const addBrowsur = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    if (req.files) {
-      req.files.forEach((file) => {
-        fs.unlink(file.path, (err) => {
-          if (err) {
-            console.error("Error unlinking file:", err);
-          } else {
-            console.log("File unlinked successfully:", file.path);
-          }
-        });
-      });
-    }
-
     res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -73,12 +61,11 @@ export const addBrowsur = async (req, res) => {
 export const getBrowsur = async (req, res) => {
   try {
     const browsur = await prisma.browsur.findMany({
-  
       include: {
         images: true,
       },
     });
-   
+
     res.status(200).json({ data: browsur, message: "Success" });
   } catch (error) {
     console.log(error);
@@ -121,7 +108,12 @@ export const editBrowsur = async (req, res) => {
 export const editSingleImage = async (req, res) => {
   const { id } = req.params;
   const { imageId } = req.params;
-  const newFile = req.file;
+  const img_url = req.body;
+
+  
+  if (!img_url) {
+    return res.status(400).json({ message: "Image is required." });
+  }
 
   if (!imageId || !id) {
     return res.status(400).json({ message: "ID is required." });
@@ -135,24 +127,10 @@ export const editSingleImage = async (req, res) => {
       return res.status(404).json({ message: "Image not found." });
     }
 
-    const localFilePath = path.join("Images", path.basename(existingImage.url));
-
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
-    } else {
-      console.error("File not found:", localFilePath);
-      return res.status(404).json({ message: "File not found." });
-    }
-
-    const imageBaseUrl = process.env.IMAGE_BASE_URL;
-    const newImageFileName = path.basename(newFile.path);
-    const localImagePath = path.join("Images", newImageFileName);
-    const imagePath = `${imageBaseUrl}/${localImagePath}`;
-
     const updatedImage = await prisma.imageBrowsur.update({
       where: { id: imageId },
       data: {
-        url: imagePath,
+        url: img_url.img_url,
         browsurId: id,
       },
     });
@@ -208,38 +186,34 @@ export const deleteBrowsur = async (req, res) => {
 };
 
 export const updateStatus = async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
+  const { id } = req.params;
+  const { status } = req.body;
+ console.log(id);
 
-    if (!id || !status) {
-      return res.status(400).json({ message: "ID and status are required." });
-    }
-  
-    try {
- 
-      if (status === true) {
-        const activeBrowsur = await prisma.browsur.findFirst({
-          where: {
-            status: true,
-          },
-        });
-  
-        if (activeBrowsur) {
-        
-          return res.status(400).json({ message: "Popup aktif tidak boleh lebih dari 1" });
-        }
-      }
-  
-    
-      const browsur = await prisma.browsur.update({
-        where: { id },
-        data: { status },
+
+  try {
+    if (status === true) {
+      const activeBrowsur = await prisma.browsur.findFirst({
+        where: {
+          status: true,
+        },
       });
-  
-      res.status(200).json({ data: browsur, message: "Success" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal server error" });
+
+      if (activeBrowsur) {
+        return res
+          .status(400)
+          .json({ message: "Popup aktif tidak boleh lebih dari 1" });
+      }
     }
-  };
-  
+
+    const browsur = await prisma.browsur.update({
+      where: { id },
+      data: { status },
+    });
+
+    res.status(200).json({ data: browsur, message: "Success" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

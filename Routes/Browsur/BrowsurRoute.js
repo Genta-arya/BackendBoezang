@@ -7,17 +7,16 @@ import {
   getBrowsur,
   updateStatus,
 } from "../../src/controllers/Browsur/BrowsurController.js";
-import { upload } from "../../src/config/Multer.js";
 
 const BrowsurRouters = express.Router();
 
-BrowsurRouters.post("/data/upload", upload.array("image", 2), addBrowsur);
+BrowsurRouters.post("/data/upload", addBrowsur);
 BrowsurRouters.get("/data", getBrowsur);
 
 BrowsurRouters.put("/data/edit/:id", editBrowsur);
 BrowsurRouters.put(
   "/data/edit/:id/image/:imageId",
-  upload.single("image"),
+
   editSingleImage
 );
 BrowsurRouters.delete("/data/:id", deleteBrowsur);

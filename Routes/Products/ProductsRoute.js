@@ -1,6 +1,6 @@
 import express from "express";
 
-import { upload } from "../../src/config/Multer.js";
+
 
 import { EditProduks} from "../../src/controllers/Products/PUT/PutProducts.js";
 import { DeleteProducts } from "../../src/controllers/Products/DELETE/DeleteProducts.js";
@@ -13,10 +13,10 @@ import {
 
 const ProductsRouters = express.Router();
 
-ProductsRouters.post("/upload", upload.single("image"), CreateProduk);
+ProductsRouters.post("/upload", CreateProduk);
 ProductsRouters.get("/data", getProduk);
 ProductsRouters.delete("/data/:id", DeleteProducts);
-ProductsRouters.put("/data/:id", upload.single("image"), EditProduks);
+ProductsRouters.put("/data/:id",  EditProduks);
 ProductsRouters.get("/data/:id", getSingleProduk);
 ProductsRouters.get("/data/category/:category" , getProdukByCategory)
 export default ProductsRouters;

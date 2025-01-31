@@ -4,60 +4,72 @@ import path from "path";
 import { SchemaProduct } from "../../../../Types/Joi.js";
 import { v4 as uuidv4 } from "uuid";
 import { json } from "express";
+
 export const EditProduks = async (req, res) => {
-  let imagePath = null;
   const { id } = req.params;
+  const {
+    name,
+    category,
+    variants,
+    desc,
+    status,
+    externalIds,
+    spesifikasi,
+    img_url,
+  } = req.body;
 
-  const { name, category, variants, desc, status, externalIds, spesifikasi } =
-    req.body;
-
-    console.log(variants)
-
-  console.log("data externalId", externalIds);
+  console.log("Request body:", req.body); // Debugging input data
 
   try {
-    // Process image if provided
-    if (req.file) {
-      const imageFileName = path.basename(req.file.path);
-      const localImagePath = path.join("Images", imageFileName);
-      const imageBaseUrl = process.env.IMAGE_BASE_URL;
+    // Pastikan `variants` sudah berbentuk array, tidak perlu di-parse jika sudah dalam format yang benar
+    let parsedVariants = Array.isArray(variants) ? variants : [];
 
-      imagePath = `${imageBaseUrl}/${localImagePath}`;
-    }
-
-    // Parse the variants JSON string
-    let parsedVariants;
-    try {
-      parsedVariants = JSON.parse(variants);
-    } catch (error) {
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
+    if (typeof variants === "string") {
+      try {
+        parsedVariants = JSON.parse(variants);
+      } catch (error) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid variants data format (JSON parsing failed)",
+        });
       }
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid variants data format",
-      });
     }
 
-    // Validate data
+    // Pastikan `externalIds` adalah array
+    let externalIdsArray = [];
+    if (typeof externalIds === "string") {
+      externalIdsArray = externalIds.split(",");
+    } else if (Array.isArray(externalIds)) {
+      externalIdsArray = externalIds;
+    }
+
+    console.log("=== Debugging Input Data ===");
+    console.log("name:", name);
+    console.log("category:", category);
+    console.log("parsedVariants:", parsedVariants);
+    console.log("parsedVariants.length:", parsedVariants.length);
+    console.log("desc:", desc);
+    console.log("status:", status);
+    console.log("spesifikasi:", spesifikasi);
+    console.log("img_url:", img_url);
+    console.log("=============================");
     if (
       !name ||
       !category ||
       !Array.isArray(parsedVariants) ||
+      parsedVariants.length === 0 ||
       !desc ||
-      !status ||
-      !spesifikasi
+      typeof status === "undefined" ||
+      !spesifikasi ||
+      !img_url
     ) {
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       return res.status(400).json({
         status: "error",
         message: "Invalid data provided",
       });
     }
 
-    // Find the product
+    // Cari produk berdasarkan ID
     const existingProduct = await prisma.produk.findUnique({
       where: { id },
       include: {
@@ -70,30 +82,15 @@ export const EditProduks = async (req, res) => {
     });
 
     if (!existingProduct) {
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       return res.status(404).json({
         status: "error",
         message: "Product not found",
       });
     }
 
-    if (req.file && existingProduct.imageUrl) {
-      // Delete old image
-      const oldImagePath = existingProduct.imageUrl.split(
-        `${process.env.IMAGE_BASE_URL}/`
-      )[1];
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
-    }
-
-    const externalIdsArray = externalIds.split(",");
-
-    // Begin transaction
+    // Mulai transaksi database
     const updatedProduct = await prisma.$transaction(async (prisma) => {
-      // Delete existing color variants
+      // Hapus colorVariants lama
       await prisma.warna.deleteMany({
         where: {
           variantId: {
@@ -102,7 +99,7 @@ export const EditProduks = async (req, res) => {
         },
       });
 
-      // Delete existing variants
+      // Hapus variants lama
       await prisma.variant.deleteMany({
         where: {
           id: {
@@ -111,20 +108,18 @@ export const EditProduks = async (req, res) => {
         },
       });
 
-      // Create new variants and map old to new IDs
+      // Tambahkan variants baru
       await Promise.all(
         parsedVariants.map(async (variant, index) => {
-          // Generate a new UUID for new variants if not provided
-          const externalId = externalIdsArray[index] || uuidv4();
+          const externalId = externalIdsArray[index] || uuidv4(); // Gunakan ID lama atau generate baru jika tidak ada
 
-          console.log("test", externalIdsArray[index]);
+          console.log("Processing variant:", variant); // Debugging
 
-          // Create new variant
-          const newVariant = await prisma.variant.create({
+          await prisma.variant.create({
             data: {
-              externalId, // Save the external ID
-              name: "produk",
-              quality: variant.quality,
+              externalId,
+              name: variant.name || "produk",
+              quality: true,
               kapasitas:
                 category.toLowerCase() === "iphone"
                   ? parseInt(variant.kapasitas, 10)
@@ -140,21 +135,20 @@ export const EditProduks = async (req, res) => {
               },
             },
           });
-
-          return newVariant;
         })
       );
 
-      // Update product
+      // Update produk utama
       const productUpdate = await prisma.produk.update({
         where: { id },
         data: {
           name,
           deskripsi: desc,
-          spesifikasi: spesifikasi,
+          spesifikasi,
+          
           category,
-          status: status === "true" ? true : false,
-          imageUrl: imagePath || existingProduct.imageUrl,
+          status: status === "true" || status === true, // Pastikan status boolean
+          imageUrl: img_url || existingProduct.imageUrl,
         },
         include: {
           variants: {
@@ -165,8 +159,6 @@ export const EditProduks = async (req, res) => {
         },
       });
 
-      console.log("Parsed Variants:", parsedVariants); // Debugging
-
       return productUpdate;
     });
 
@@ -176,10 +168,6 @@ export const EditProduks = async (req, res) => {
       data: updatedProduct,
     });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
     console.error("Error updating product:", error);
     return res.status(500).json({
       status: "error",

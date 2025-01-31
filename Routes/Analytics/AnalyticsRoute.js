@@ -1,10 +1,10 @@
-import express from 'express';
-import { getVisitors } from '../../src/controllers/analytics/analyticsController.js';
+// import express from 'express';
+// import { getVisitors } from '../../src/controllers/analytics/analyticsController.js';
 
 
-const Analyticsrouter = express.Router();
+// const Analyticsrouter = express.Router();
 
 
-Analyticsrouter.get('/visitors', getVisitors);
+// Analyticsrouter.get('/visitors', getVisitors);
 
-export default Analyticsrouter;
+// export default Analyticsrouter;

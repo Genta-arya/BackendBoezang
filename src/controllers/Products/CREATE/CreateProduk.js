@@ -5,29 +5,17 @@ import { v4 as uuidv4 } from "uuid";
 const port = process.env.PORT || 5001; // Use port 5001 if not specified
 
 export const CreateProduk = async (req, res) => {
-  let imagePath = null;
-
   try {
-    // Process image if provided
-    if (req.file) {
-      const imageFileName = path.basename(req.file.path);
-      const localImagePath = path.join("Images", imageFileName);
-      const imageBaseUrl = process.env.IMAGE_BASE_URL;
-
-      imagePath = `${imageBaseUrl}/${localImagePath}`;
-    }
-
     // Get data from request body
-    const { name, category, variants, desc, spesifikasi } = req.body;
+    const { name, category, variants, desc, spesifikasi, img_url } = req.body;
+
+    console.log(img_url);
 
     // Parse the variants JSON string
     let parsedVariants;
     try {
       parsedVariants = JSON.parse(variants);
     } catch (error) {
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       return res.status(400).json({
         status: "error",
         message: "Invalid variants data format",
@@ -47,8 +35,10 @@ export const CreateProduk = async (req, res) => {
 
     // Create product
     const randomId = uuidv4();
-    const formattedDate = new Date().toISOString().split('T')[0]; 
-    const customId = `${name.toLowerCase().replace(/\s+/g, '-')}-${formattedDate}-${randomId}`; 
+    const formattedDate = new Date().toISOString().split("T")[0];
+    const customId = `${name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}-${formattedDate}-${randomId}`;
 
     const newProduct = await prisma.produk.create({
       data: {
@@ -57,7 +47,7 @@ export const CreateProduk = async (req, res) => {
         category,
         spesifikasi: spesifikasi,
         deskripsi: desc,
-        imageUrl: imagePath, // Use full image URL
+        imageUrl: img_url, // Use full image URL
         variants: {
           create: parsedVariants.map((variant) => ({
             name: "produk",
@@ -66,7 +56,7 @@ export const CreateProduk = async (req, res) => {
             kapasitas:
               category.toLowerCase() === "iphone"
                 ? parseInt(variant.kapasitas, 10)
-                : 0, 
+                : 0,
             price:
               category.toLowerCase() === "iphone"
                 ? parseInt(variant.price, 10)
